@@ -5,7 +5,7 @@ import java.sql.*;
 import java.util.ArrayList;
 import java.util.List;
 
-public class AbstractDAO<T> {
+public abstract class AbstractDAO<T> {
     private final Connection conn;
     private final String table;
 
@@ -14,9 +14,9 @@ public class AbstractDAO<T> {
         this.table = table;
     }
 
-    public void dropTable(Class<T> cls){
-        try(Connection conn = ConnectionFactory.getConnection();
-            Statement st = conn.createStatement()){
+    public void dropTable(Class<T> cls) {
+        try (Connection conn = ConnectionFactory.getConnection();
+             Statement st = conn.createStatement()) {
 
             String sql = "DROP TABLE IF EXISTS " + table;
             st.execute(sql);
@@ -76,7 +76,7 @@ public class AbstractDAO<T> {
             for (Field f : fields) {
                 if (f != id) {
                     f.setAccessible(true);
-                    names.append(f.getName()).append(",");
+                    names.append(f.getName()).append(',');
                     values.append('"').append(f.get(t)).append("\",");
                 }
             }
@@ -107,15 +107,17 @@ public class AbstractDAO<T> {
                 if (f != id) {
                     f.setAccessible(true);
                     sb.append(f.getName())
-                            .append(" = \"")
+                            .append(" = ")
+                            .append('"')
                             .append(f.get(t))
                             .append('"')
-                            .append(",");
+                            .append(',');
                 }
             }
 
             sb.deleteCharAt(sb.length() - 1);
-            sql = "UPDATE " + table + " SET " + sb + " WHERE " + id.getName() + "=" + id.get(t);
+            sql = "UPDATE " + table + " SET " + sb + " WHERE "
+                    + id.getName() + " = \"" + id.get(t) + "\"";
         } catch (IllegalAccessException e) {
             e.printStackTrace();
         }
@@ -152,11 +154,11 @@ public class AbstractDAO<T> {
              ResultSet rs = st.executeQuery("SELECT * FROM " + table)) {
             ResultSetMetaData md = rs.getMetaData();
 
-            while(rs.next()){
+            while (rs.next()) {
                 T t = cls.newInstance(); //!!!
-                for(int i = 1; i<md.getColumnCount();i++){
+                for (int i = 1; i <= md.getColumnCount(); i++) {
                     String columnName = md.getColumnName(i);
-                    Field field = cls.getField(columnName);
+                    Field field = cls.getDeclaredField(columnName);
                     field.setAccessible(true);
                     field.set(t, rs.getObject(columnName));
                 }
@@ -164,10 +166,11 @@ public class AbstractDAO<T> {
             }
 
         } catch (Exception ex) {
+            ex.printStackTrace();
             throw new RuntimeException();
         }
 
-        return  result;
+        return result;
 
     }
 
