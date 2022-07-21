@@ -16,12 +16,18 @@ public class Main {
             dao.createTable(Client.class);
 
             Client testClient = new Client("Andrew", 27);
+            System.out.println("Before:");
+            System.out.println(testClient);
             dao.add(testClient);
 
+            System.out.println("From select (name,id)");
             List<Client> clientList = dao.getAll(Client.class, "name", "id");
             for (Client cl : clientList) {
                 System.out.println(cl);
             }
+
+            System.out.println("After:");
+            System.out.println(testClient);
 
 
         } catch (SQLException e) {

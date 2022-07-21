@@ -1,6 +1,7 @@
 package prog.academy;
 
 import java.lang.reflect.Field;
+import java.math.BigInteger;
 import java.sql.*;
 import java.util.ArrayList;
 import java.util.List;
@@ -94,6 +95,18 @@ public abstract class AbstractDAO<T> {
         } catch (SQLException e) {
             e.printStackTrace();
         }
+
+        try (Statement st = conn.createStatement()) {
+            ResultSet rs = st.executeQuery("select LAST_INSERT_ID()");
+
+            rs.next();
+            int newID = ((BigInteger) rs.getObject(1)).intValue();
+            id.set(t, newID);
+
+        } catch (SQLException | IllegalAccessException e) {
+            e.printStackTrace();
+        }
+
     }
 
     public void update(T t) {
@@ -171,7 +184,6 @@ public abstract class AbstractDAO<T> {
         }
 
         return result;
-
     }
 
     public List<T> getAll(Class<T> cls, String... columns) {
@@ -181,10 +193,10 @@ public abstract class AbstractDAO<T> {
         if (columns.length == 0) {
             choice.append('*');
         } else {
-            for(String col : columns){
+            for (String col : columns) {
                 choice.append(col).append(',');
             }
-            choice.deleteCharAt(choice.length()-1);
+            choice.deleteCharAt(choice.length() - 1);
         }
 
         try (Statement st = conn.createStatement();
