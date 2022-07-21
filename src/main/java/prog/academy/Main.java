@@ -18,23 +18,11 @@ public class Main {
             Client testClient = new Client("Andrew", 27);
             dao.add(testClient);
 
-            List<Client> clientList = dao.getAll(Client.class);
+            List<Client> clientList = dao.getAll(Client.class, "name", "id");
             for (Client cl : clientList) {
                 System.out.println(cl);
             }
 
-            testClient = clientList.get(0);
-            testClient.setAge(32);
-            testClient.setName("Boris");
-
-            dao.update(testClient);
-
-            List<Client> clientList2 = dao.getAll(Client.class);
-            for (Client cl : clientList2) {
-                System.out.println(cl);
-            }
-
-            dao.delete(testClient);
 
         } catch (SQLException e) {
             e.printStackTrace();
