@@ -14,6 +14,17 @@ public class AbstractDAO<T> {
         this.table = table;
     }
 
+    public void dropTable(Class<T> cls){
+        try(Connection conn = ConnectionFactory.getConnection();
+            Statement st = conn.createStatement()){
+
+            String sql = "DROP TABLE IF EXISTS " + table;
+            st.execute(sql);
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+    }
+
     public void createTable(Class<T> cls) {
         Field[] fields = cls.getDeclaredFields();
         Field id = getPrimaryKeyField(fields);
@@ -24,7 +35,8 @@ public class AbstractDAO<T> {
                 .append("(");
 
         sql.append(id.getName())
-                .append(" INT NOT NULL AUTO_INCREMENT PRIMARY_KEY,");
+                .append(" ")
+                .append(" INT NOT NULL AUTO_INCREMENT PRIMARY KEY,");
 
         for (Field f : fields) {
             if (f != id) {
@@ -47,7 +59,8 @@ public class AbstractDAO<T> {
 
         try (Statement st = conn.createStatement()) {
             st.execute(sql.toString());
-        } catch (Exception ex) {
+        } catch (SQLException ex) {
+            ex.printStackTrace();
             throw new RuntimeException();
         }
     }
